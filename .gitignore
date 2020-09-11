@@ -1,3 +1,9 @@
+# Configuration
+config.sh
+
+# Editors
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

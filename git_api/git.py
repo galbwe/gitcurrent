@@ -9,8 +9,10 @@ Remote = NewType('Remote', str)
 class Shell:
     encoding = 'utf-8'
 
-    def __init__(self, working_directory):
-        self.working_directory = working_directory
+    def __init__(self, working_directory=None):
+        if working_directory is None:
+            working_directory = os.path.dirname(__name__)
+        self.working_directory = os.path.abspath(working_directory)
 
     def run(self, cmd: str) -> Tuple[bool, str]:
         completed_process = subprocess.run(shlex.split(cmd), capture_output=True, cwd=self.working_directory)
@@ -22,10 +24,10 @@ class Shell:
 
 class Git:
 
-    def __init__(self, repo, shell=None):
+    def __init__(self, shell=None):
         if shell is None:
-            self._shell = Shell(working_directory=repo)
-        self.repo = os.path.abspath(repo)
+            shell = Shell()
+        self._shell = shell
 
     def init(self):
         success, out = self._shell.run('git init')
@@ -41,7 +43,7 @@ class Git:
         success, out = self._shell.run('git branch')
         if success:
             branches = out.strip().split('\n')
-            branches.sort(key=lambda branch: (not branch.startswith('* '), branch))
+            branches.sort(key=lambda branch: (not branch.startswith('* '), branch.strip()))
             branches[0] = branches[0].replace('* ', '')
             return [branch.strip() for branch in branches]
         raise OSError(out)
